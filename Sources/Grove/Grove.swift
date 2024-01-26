@@ -19,7 +19,7 @@ public final class Grove: @unchecked Sendable {
     }
 
     private enum DependencyItem {
-        case initializer(() -> AnyObject, scope: Scope)
+        case initializer(() -> Any, scope: Scope)
         case instance(Any)
     }
     private var dependencyItemsMap = [String: DependencyItem]()
@@ -34,11 +34,11 @@ public final class Grove: @unchecked Sendable {
 
     /// Registers a dependency's initializer
     /// - Parameters:
-    ///   - initializer: Initializer for the dependency to be registered (ex. JSONEncoder.init, or { JSONEncoder() })
     ///   - type: Optional type of to use for registration (ex. JSONEncodingProtocol for the above initializer)
     ///   - scope: Optional scope to use for registration: singleton or transient. Transient dependencies are initialized every time they are resolved
+    ///   - initializer: Initializer for the dependency to be registered (ex. JSONEncoder.init, or { JSONEncoder() })
     ///
-    public func register<T>(_ initializer: @escaping () -> AnyObject, type: T.Type = T.self, scope: Scope = .singleton) {
+    public func register<T>(as type: T.Type = T.self, scope: Scope = .singleton, _ initializer: @escaping () -> T) {
         Self.defaultContainerLock.lock()
         Self.defaultContainer = self
         Self.defaultContainerLock.unlock()
@@ -50,10 +50,10 @@ public final class Grove: @unchecked Sendable {
 
     /// Registers using a value
     /// - Parameters:
-    ///   - value: Value for the dependency to be registered
     ///   - type: Optional type of to use for registration
+    ///   - value: Value for the dependency to be registered
     ///
-    public func register<T>(value: T, type: T.Type = T.self) {
+    public func register<T>(as type: T.Type = T.self, value: T) {
         Self.defaultContainerLock.lock()
         Self.defaultContainer = self
         Self.defaultContainerLock.unlock()
@@ -112,7 +112,7 @@ public final class Grove: @unchecked Sendable {
         }
     }
 
-    public func register<T>(_ initializer: @escaping () -> T, scope: Scope = .singleton) where T: AnyObject {
-        register(initializer, type: T.self, scope: scope)
+    public func register<T>(_ initializer: @escaping () -> T, scope: Scope = .singleton) {
+        register(as: T.self, scope: scope, initializer)
     }
 }

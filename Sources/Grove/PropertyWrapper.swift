@@ -9,9 +9,9 @@ import Foundation
 
 /// Grove resolution property wrapper
 ///
-/// In most cases, where only a single container is used, this property wrapper can be used to simplify resolution.
+/// This property wrapper can be used to simplify resolution. Optionally a container other than the default can be specified.
 ///
-/// Allows to resolve dependencies in this fashion:
+/// It allows to resolve dependencies in this fashion:
 ///  ```
 ///  @Resolve var jsonEncoder: JSONEncodingProtocol
 ///  ```
@@ -24,7 +24,7 @@ import Foundation
 public struct Resolve<T> {
     public var wrappedValue: T
 
-    public init() {
-        self.wrappedValue = Grove.defaultContainer.resolve()
+    public init(container: Grove = .defaultContainer) {
+        self.wrappedValue = container.resolve()
     }
 }
