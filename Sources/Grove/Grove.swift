@@ -13,9 +13,10 @@ public final class Grove: @unchecked Sendable {
 
     /// Scope, or lifetime of a reference-type dependency
     public enum Scope {
-        // singleton: dependency is initialized once and then reused. Its lifetime is the lifetime of the container (the app in most cases).
-        // transient: dependency is initialized every time it is resolved. Its lifetime is the lifetime of the object that owns the dependency.
-        case singleton, transient
+        /// Dependency is initialized once and then reused. Its lifetime is the lifetime of the container (the app in most cases).
+        case singleton
+        /// Dependency is initialized every time it is resolved. Its lifetime is the lifetime of the object that owns the dependency.
+        case transient
     }
 
     private enum DependencyItem {
@@ -41,7 +42,7 @@ public final class Grove: @unchecked Sendable {
     public func register<Dependency>(
         _ type: Dependency.Type = Dependency.self,
         scope: Scope = .singleton,
-        initializer: @escaping () -> Dependency
+        with initializer: @escaping () -> Dependency
     ) {
         Self.defaultContainerLock.lock()
         Self.defaultContainer = self
@@ -52,18 +53,17 @@ public final class Grove: @unchecked Sendable {
         dependencyItemsMapLock.unlock()
     }
 
-    /// Registers using a value
-    /// - Parameters:
-    ///   - type: Optional type of to use for registration
-    ///   - value: Value for the dependency to be registered
-    ///
-    public func register<Dependency>(as type: Dependency.Type = Dependency.self, value: Dependency) {
+    public func register<Dependency>(
+        _ initializer: @autoclosure @escaping () -> Dependency,
+        as type: Dependency.Type = Dependency.self,
+        scope: Scope = .singleton
+    ) {
         Self.defaultContainerLock.lock()
         Self.defaultContainer = self
         Self.defaultContainerLock.unlock()
 
         dependencyItemsMapLock.lock()
-        dependencyItemsMap[key(for: Dependency.self)] = .instance(value)
+        dependencyItemsMap[key(for: Dependency.self)] = .initializer(initializer, scope: scope)
         dependencyItemsMapLock.unlock()
     }
 
