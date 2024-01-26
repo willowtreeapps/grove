@@ -9,9 +9,9 @@ import Foundation
 
 /// Grove
 /// Simple Dependency Injection Container Library
-public final class Grove {
+public final class Grove: @unchecked Sendable {
 
-    /// Scope, or lifetime of a dependency
+    /// Scope, or lifetime of a reference-type dependency
     public enum Scope {
         // singleton: dependency is initialized once and then reused. Its lifetime is the lifetime of the container (the app in most cases).
         // transient: dependency is initialized every time it is resolved. Its lifetime is the lifetime of the object that owns the dependency.
@@ -19,28 +19,47 @@ public final class Grove {
     }
 
     private enum DependencyItem {
-        case initializer(() -> AnyObject, scope: Scope)
-        case instance(AnyObject)
+        case initializer(() -> Any, scope: Scope)
+        case instance(Any)
     }
     private var dependencyItemsMap = [String: DependencyItem]()
     private let dependencyItemsMapLock = NSLock()
-    public private(set) static var defaultContainer = Grove()
     private static let defaultContainerLock = NSLock()
-    public init() {}
+
+    /// Default container
+    public private(set) static var defaultContainer = Grove()
+
+    /// Public initializer
+    public init() { /* No-Op */ }
 
     /// Registers a dependency's initializer
     /// - Parameters:
-    ///   - initializer: Initializer for the dependency to be registered (ex. JSONEncoder.init, or { JSONEncoder() })
     ///   - type: Optional type of to use for registration (ex. JSONEncodingProtocol for the above initializer)
     ///   - scope: Optional scope to use for registration: singleton or transient. Transient dependencies are initialized every time they are resolved
+    ///   - initializer: Initializer for the dependency to be registered (ex. JSONEncoder.init, or { JSONEncoder() })
     ///
-    public func register<T>(_ initializer: @escaping () -> AnyObject, type: T.Type = T.self, scope: Scope = .singleton) {
+    public func register<T>(as type: T.Type = T.self, scope: Scope = .singleton, _ initializer: @escaping () -> T) {
         Self.defaultContainerLock.lock()
         Self.defaultContainer = self
         Self.defaultContainerLock.unlock()
 
         dependencyItemsMapLock.lock()
         dependencyItemsMap[key(for: T.self)] = DependencyItem.initializer(initializer, scope: scope)
+        dependencyItemsMapLock.unlock()
+    }
+
+    /// Registers using a value
+    /// - Parameters:
+    ///   - type: Optional type of to use for registration
+    ///   - value: Value for the dependency to be registered
+    ///
+    public func register<T>(as type: T.Type = T.self, value: T) {
+        Self.defaultContainerLock.lock()
+        Self.defaultContainer = self
+        Self.defaultContainerLock.unlock()
+
+        dependencyItemsMapLock.lock()
+        dependencyItemsMap[key(for: T.self)] = DependencyItem.instance(value)
         dependencyItemsMapLock.unlock()
     }
 
@@ -54,10 +73,9 @@ public final class Grove {
         let dependencyItem = dependencyItemsMap[key]
         dependencyItemsMapLock.unlock()
 
-        let objectInstance: AnyObject
         switch dependencyItem {
         case .initializer(let initializer, let scope):
-            objectInstance = initializer()
+            let objectInstance = initializer()
             switch scope {
             case .singleton:
                 dependencyItemsMapLock.lock()
@@ -67,17 +85,18 @@ public final class Grove {
                 // No-Op
                 break
             }
+            guard let objectInstance = objectInstance as? T else {
+                preconditionFailure("Grove: '\(key)' stored as '\(objectInstance.self)' (requested: '\(T.self)').")
+            }
+            return objectInstance
         case .instance(let instance):
-            objectInstance = instance
+            guard let instance = instance as? T else {
+                preconditionFailure("Grove: '\(key)' stored as '\(instance.self)' (requested: '\(T.self)').")
+            }
+            return instance
         case .none:
             preconditionFailure("Grove: '\(key)' Not registered.")
         }
-
-        guard let objectInstance = objectInstance as? T else {
-            preconditionFailure("Grove: '\(key)' stored as '\(objectInstance.self)' (requested: '\(T.self)').")
-        }
-
-        return objectInstance
     }
 
     // MARK: Helpers
@@ -93,7 +112,7 @@ public final class Grove {
         }
     }
 
-    public func register<T>(_ initializer: @escaping () -> T, scope: Scope = .singleton) where T: AnyObject {
-        register(initializer, type: T.self, scope: scope)
+    public func register<T>(_ initializer: @escaping () -> T, scope: Scope = .singleton) {
+        register(as: T.self, scope: scope, initializer)
     }
 }

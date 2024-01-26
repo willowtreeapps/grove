@@ -26,21 +26,35 @@ dependencies: [
 ## Usage
 Grove simplifies dependency registration and resolving. Here's an example:
 
+### Registration
+
 ```swift
 let container = Grove.defaultContainer // You can use the default container or create your own
 
-// Register a dependency as a singleton 
+// Register a reference type dependency as a singleton 
 container.register(JSONEncoder.init)
 
 // or with a transient lifetime
 container.register(JSONEncoder.init, scope: .transient)
 
+// Register a value type dependency (an enum for example)
+container.register(value: DeploymentEnvironment.production)
+```
+
+### Resolution
+
+```swift
 // Later in your code, you can resolve the dependency
 let jsonEncoder: JSONEncoder = container.resolve()
 
 // Alternatively, with the @Resolve property wrapper, usage becomes simpler:
 @Resolve var jsonEncoder: JSONEncoder
+
+// Value types are resolved the same way (here deploymentEnvironment would be .production)
+@Resolve var deploymentEnvironment: DeploymentEnvironment
 ```
+
+### Using a registrar
 
 This shows how you can set up a registrar class both for production and for unit tests and SwiftUI previews:
 
