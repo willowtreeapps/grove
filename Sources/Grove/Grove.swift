@@ -58,13 +58,7 @@ public final class Grove: @unchecked Sendable {
         as type: Dependency.Type = Dependency.self,
         scope: Scope = .singleton
     ) {
-        Self.defaultContainerLock.lock()
-        Self.defaultContainer = self
-        Self.defaultContainerLock.unlock()
-
-        dependencyItemsMapLock.lock()
-        dependencyItemsMap[key(for: Dependency.self)] = .initializer(initializer, scope: scope)
-        dependencyItemsMapLock.unlock()
+        register(type, scope: scope, with: initializer)
     }
 
     /// Returns the resolved dependency
