@@ -21,7 +21,7 @@ dependencies: [
 ]
 ```
 
-(Note: Until it's public, use this repository address: `git@github.com:willowtreeapps/grove.git`, version "1.0.0-beta.1")
+(Note: Until it's public, use this repository address: `git@github.com:willowtreeapps/grove.git`, version "1.0.0-beta.3")
 
 ## Usage
 Grove simplifies dependency registration and resolving. Here's an example:
@@ -35,7 +35,7 @@ let container = Grove.defaultContainer // You can use the default container or c
 container.register(JSONEncoder.init)
 
 // or with a transient lifetime
-container.register(JSONEncoder.init, scope: .transient)
+container.register(scope: .transient, JSONEncoder.init)
 
 // Register a value type dependency (an enum for example)
 container.register(value: DeploymentEnvironment.production)
@@ -63,46 +63,40 @@ final class DependenciesRegistrar {
     static let container = Grove.defaultContainer
      
     static func register() {
-        container.register {
+        container.register(as: JSONEncoder.self) {
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             return encoder
         }
 
-        container.register {
+        container.register(as: JSONDecoder.self) {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             return decoder
         }
 
-        container.register(NASARepository.init, type: NASARepositoryProtocol.self)
+        container.register(as: NASARepositoryProtocol.self, NASARepository.init)
     }
 
     static func registerMocks() {
-        container.register {
+        container.register(as: JSONEncoder.self) {
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             return encoder
         }
 
-        container.register {
+        container.register(as: JSONDecoder.self) {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             return decoder
         }
 
-        container.register(MockNASARepository.init, type: NASARepositoryProtocol.self)
+        container.register(as: NASARepositoryProtocol.self, MockNASARepository.init)
     }
 }
 ```
 
 You can then call DependenciesRegistrar.register() from your App's init() or AppDelegate. For unit tests or SwiftUI previews, you can call DependenciesRegistrar.registerMocks().
-
-### Note on defaultContainer
-Grove provides a defaultContainer. But it also tracks your own containers, and updates defaultContainer to match the container of the last registered dependency. This ensures the `@Resolve` property wrapper works as expected. But if your app needs multiple distinct dependency containers, I recommend not using the property wrapper, and resolve by using the container explicitly instead:
-```swift
-   let dependency: DependencyType = container.resolve()
-```
 
 ## Contributing
 Contributions are immensely appreciated. Feel free to submit pull requests or to create issues to discuss any potential bugs or improvements.

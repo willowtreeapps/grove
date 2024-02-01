@@ -24,10 +24,9 @@ public final class Grove: @unchecked Sendable {
     }
     private var dependencyItemsMap = [String: DependencyItem]()
     private let dependencyItemsMapLock = NSLock()
-    private static let defaultContainerLock = NSLock()
 
     /// Default container
-    public private(set) static var defaultContainer = Grove()
+    public static let defaultContainer = Grove()
 
     /// Public initializer
     public init() { /* No-Op */ }
@@ -39,10 +38,6 @@ public final class Grove: @unchecked Sendable {
     ///   - initializer: Initializer for the dependency to be registered (ex. JSONEncoder.init, or { JSONEncoder() })
     ///
     public func register<T>(as type: T.Type = T.self, scope: Scope = .singleton, _ initializer: @escaping () -> T) {
-        Self.defaultContainerLock.lock()
-        Self.defaultContainer = self
-        Self.defaultContainerLock.unlock()
-
         dependencyItemsMapLock.lock()
         dependencyItemsMap[key(for: T.self)] = DependencyItem.initializer(initializer, scope: scope)
         dependencyItemsMapLock.unlock()
@@ -54,10 +49,6 @@ public final class Grove: @unchecked Sendable {
     ///   - value: Value for the dependency to be registered
     ///
     public func register<T>(as type: T.Type = T.self, value: T) {
-        Self.defaultContainerLock.lock()
-        Self.defaultContainer = self
-        Self.defaultContainerLock.unlock()
-
         dependencyItemsMapLock.lock()
         dependencyItemsMap[key(for: T.self)] = DependencyItem.instance(value)
         dependencyItemsMapLock.unlock()
