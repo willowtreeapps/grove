@@ -22,7 +22,7 @@ final class GroveTests: XCTestCase {
 
     /// Tests registering a class and resolving it.
     func testDirectClassRegistration() {
-        Grove.defaultContainer.register(NotProtocolConformingTestClass.init)
+        Grove.defaultContainer.register(NotProtocolConformingTestClass())
 
         let testClass: NotProtocolConformingTestClass = Grove.defaultContainer.resolve()
         @Resolve var testClass2: TestProtocol
@@ -31,7 +31,7 @@ final class GroveTests: XCTestCase {
 
     /// Tests registering a class as a protocol and resolving it as a protocol.
     func testClassAsProtocolRegistration() {
-        Grove.defaultContainer.register(as: TestProtocol.self, TestClass.init)
+        Grove.defaultContainer.register(as: TestProtocol.self, TestClass())
 
         @Resolve var testClass: TestProtocol
         XCTAssertEqual(testClass.value, 0)
@@ -39,7 +39,7 @@ final class GroveTests: XCTestCase {
 
     /// Tests registering a class using the transient lifetime scope
     func testTransientScope() {
-        Grove.defaultContainer.register(as: TestProtocol.self, scope: .transient, TestClass.init)
+        Grove.defaultContainer.register(as: TestProtocol.self, scope: .transient, TestClass())
 
         @Resolve var testClass1: TestProtocol
         testClass1.increment()
@@ -53,7 +53,7 @@ final class GroveTests: XCTestCase {
 
     /// Tests registering a class using the singleton lifetime scope
     func testSingletonScope() {
-        Grove.defaultContainer.register(as: TestProtocol.self, scope: .singleton, TestClass.init)
+        Grove.defaultContainer.register(as: TestProtocol.self, scope: .singleton, TestClass())
 
         @Resolve var testClass1: TestProtocol
         testClass1.increment()

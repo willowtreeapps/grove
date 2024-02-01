@@ -32,13 +32,13 @@ Grove simplifies dependency registration and resolving. Here's an example:
 let container = Grove.defaultContainer // You can use the default container or create your own
 
 // Register a reference type dependency as a singleton 
-container.register(JSONEncoder.init)
+container.register(JSONEncoder())
 
 // or with a transient lifetime
-container.register(scope: .transient, JSONEncoder.init)
+container.register(scope: .transient, JSONEncoder())
 
 // Register a value type dependency (an enum for example)
-container.register(value: DeploymentEnvironment.production)
+container.register(DeploymentEnvironment.production)
 ```
 
 ### Resolution
@@ -75,7 +75,7 @@ final class DependenciesRegistrar {
             return decoder
         }
 
-        container.register(as: NASARepositoryProtocol.self, NASARepository.init)
+        container.register(as: NASARepositoryProtocol.self, NASARepository())
     }
 
     static func registerMocks() {
@@ -91,12 +91,12 @@ final class DependenciesRegistrar {
             return decoder
         }
 
-        container.register(as: NASARepositoryProtocol.self, MockNASARepository.init)
+        container.register(as: NASARepositoryProtocol.self, MockNASARepository())
     }
 }
 ```
 
-You can then call DependenciesRegistrar.register() from your App's init() or AppDelegate. For unit tests or SwiftUI previews, you can call DependenciesRegistrar.registerMocks().
+You can then call `DependenciesRegistrar.register()` from your App's `init()` or `AppDelegate`. For unit tests or SwiftUI previews, you can call `DependenciesRegistrar.registerMocks()`.
 
 ## Contributing
 Contributions are immensely appreciated. Feel free to submit pull requests or to create issues to discuss any potential bugs or improvements.
