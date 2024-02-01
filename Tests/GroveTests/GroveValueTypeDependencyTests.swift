@@ -34,7 +34,7 @@ final class GroveValueTypeDependencyTests: XCTestCase {
 
     /// Tests registering a value type as a protocol and resolving it as a protocol.
     func testValueTypeAsProtocolRegistration() {
-        Grove.defaultContainer.register(TestEnum.v, as: TestEnumProtocol.self)
+        Grove.defaultContainer.register(as: TestEnumProtocol.self, TestEnum.v)
 
         @Resolve var testEnum: TestEnumProtocol
         XCTAssertEqual(testEnum.value, "v")

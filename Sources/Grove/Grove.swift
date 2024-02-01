@@ -40,25 +40,21 @@ public final class Grove: @unchecked Sendable {
     ///   - initializer: Initializer for the dependency to be registered (ex. JSONEncoder.init, or { JSONEncoder() })
     ///
     public func register<Dependency>(
-        _ type: Dependency.Type = Dependency.self,
+        as type: Dependency.Type = Dependency.self,
         scope: Scope = .singleton,
         with initializer: @escaping () -> Dependency
     ) {
-        Self.defaultContainerLock.lock()
-        Self.defaultContainer = self
-        Self.defaultContainerLock.unlock()
-
         dependencyItemsMapLock.lock()
         dependencyItemsMap[key(for: Dependency.self)] = .initializer(initializer, scope: scope)
         dependencyItemsMapLock.unlock()
     }
 
     public func register<Dependency>(
-        _ initializer: @autoclosure @escaping () -> Dependency,
         as type: Dependency.Type = Dependency.self,
-        scope: Scope = .singleton
+        scope: Scope = .singleton,
+        _ initializer: @autoclosure @escaping () -> Dependency
     ) {
-        register(type, scope: scope, with: initializer)
+        register(as: type, scope: scope, with: initializer)
     }
 
     /// Returns the resolved dependency
