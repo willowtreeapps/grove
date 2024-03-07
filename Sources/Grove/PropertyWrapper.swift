@@ -21,10 +21,14 @@ import Foundation
 ///  ```
 ///
 @propertyWrapper
-public struct Resolve<T> {
-    public var wrappedValue: T
+public struct Resolve<Dependency> {
+    private var container: Grove
 
-    public init(container: Grove = .defaultContainer) {
-        self.wrappedValue = container.resolve()
+    public init(_ type: Dependency.Type, container: Grove = .defaultContainer) {
+        self.container = container
+    }
+
+    public var wrappedValue: Dependency {
+        container.resolve()
     }
 }

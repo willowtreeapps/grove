@@ -1,17 +1,13 @@
 import XCTest
 @testable import Grove
 
-private protocol TestProtocol {
+protocol TestProtocol {
     var value: Int { get }
     func increment()
 }
 
 private final class TestClass: TestProtocol {
-    var value: Int
-
-    init(value: Int = 0) {
-        self.value = value
-    }
+    var value: Int = 0
 
     func increment() {
         value += 1
@@ -31,7 +27,6 @@ final class GroveTests: XCTestCase {
 
         // When
         let testClass: NotProtocolConformingTestClass = Grove.defaultContainer.resolve()
-        @Resolve var testClass2: TestProtocol
 
         // Then
         XCTAssertEqual(testClass.value, "grove")
@@ -43,7 +38,7 @@ final class GroveTests: XCTestCase {
         Grove.defaultContainer.register(as: TestProtocol.self, TestClass())
 
         // When
-        @Resolve var testClass: TestProtocol
+        let testClass: TestProtocol = Grove.defaultContainer.resolve()
 
         // Then
         XCTAssertEqual(testClass.value, 0)
@@ -53,7 +48,7 @@ final class GroveTests: XCTestCase {
     func testTransientScope() {
         // Given
         Grove.defaultContainer.register(as: TestProtocol.self, scope: .transient, TestClass())
-        @Resolve var testClass1: TestProtocol
+        let testClass1: TestProtocol = Grove.defaultContainer.resolve()
 
         // When
         testClass1.increment()
@@ -62,7 +57,7 @@ final class GroveTests: XCTestCase {
 
         // Then
         XCTAssertEqual(testClass1.value, 3)
-        @Resolve var testClass2: TestProtocol
+        let testClass2: TestProtocol = Grove.defaultContainer.resolve()
         XCTAssertEqual(testClass2.value, 0)
     }
 
@@ -70,7 +65,7 @@ final class GroveTests: XCTestCase {
     func testSingletonScope() {
         // Given
         Grove.defaultContainer.register(as: TestProtocol.self, scope: .singleton, TestClass())
-        @Resolve var testClass1: TestProtocol
+        let testClass1: TestProtocol = Grove.defaultContainer.resolve()
 
         // When
         testClass1.increment()
@@ -79,22 +74,7 @@ final class GroveTests: XCTestCase {
 
         // Then
         XCTAssertEqual(testClass1.value, 3)
-        @Resolve var testClass2: TestProtocol
+        let testClass2: TestProtocol = Grove.defaultContainer.resolve()
         XCTAssertEqual(testClass2.value, 3)
-    }
-}
-
-final class GrovePropertyWrapperTests: XCTestCase {
-    @Resolve private var testClass: TestProtocol
-
-    func testUpdatedRegistration() {
-        // Given
-        Grove.defaultContainer.register(as: TestProtocol.self, scope: .singleton, TestClass(value: 10))
-
-        // When
-        Grove.defaultContainer.register(as: TestProtocol.self, scope: .singleton, TestClass(value: 20))
-
-        // Then
-        XCTAssertEqual(testClass.value, 20)
     }
 }

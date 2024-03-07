@@ -28,7 +28,7 @@ final class GroveValueTypeDependencyTests: XCTestCase {
     func testDirectTypeRegistration() {
         Grove.defaultContainer.register(NotProtocolConformingTestEnum.b)
 
-        @Resolve var testEnum: NotProtocolConformingTestEnum
+        @Resolve(NotProtocolConformingTestEnum.self) var testEnum
         XCTAssertEqual(testEnum, .b)
     }
 
@@ -36,7 +36,7 @@ final class GroveValueTypeDependencyTests: XCTestCase {
     func testValueTypeAsProtocolRegistration() {
         Grove.defaultContainer.register(as: TestEnumProtocol.self, TestEnum.v)
 
-        @Resolve var testEnum: TestEnumProtocol
+        @Resolve(TestEnumProtocol.self) var testEnum
         XCTAssertEqual(testEnum.value, "v")
     }
 }
