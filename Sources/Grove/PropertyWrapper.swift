@@ -23,12 +23,28 @@ import Foundation
 @propertyWrapper
 public struct Resolve<Dependency> {
     private var container: Grove
+    private var transientInstance: Dependency?
 
     public init(_ type: Dependency.Type, container: Grove = .defaultContainer) {
         self.container = container
+
+        switch container.scope(for: type) {
+        case .singleton:
+            break
+        case .transient:
+            transientInstance = (container.resolve() as Dependency)
+        }
     }
 
     public var wrappedValue: Dependency {
-        container.resolve()
+        switch container.scope(for: Dependency.self) {
+        case .singleton:
+            return container.resolve()
+        case .transient:
+            guard let transientInstance else {
+                preconditionFailure("Grove: Error resolving transient dependency: '\(String(describing: Dependency.self))'")
+            }
+            return transientInstance
+        }
     }
 }

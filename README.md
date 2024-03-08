@@ -47,7 +47,7 @@ container.register(DeploymentEnvironment.production)
 // Later in your code, you can resolve the dependency
 let jsonEncoder: JSONEncoder = container.resolve()
 
-// Alternatively, for singleton-scoped dependencies you can use the @Resolve property wrapper:
+// Alternatively, you can use the @Resolve property wrapper:
 @Resolve(JSONEncoder.self) var jsonEncoder
 
 // Value types are resolved the same way (here deploymentEnvironment would be .production)

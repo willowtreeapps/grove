@@ -85,14 +85,32 @@ public final class Grove: @unchecked Sendable {
         case .instance(let instance):
             dependency = instance
         case .none:
-            preconditionFailure("Grove: '\(key)' Not registered.")
+            preconditionFailure("Grove: '\(String(describing: Dependency.self))' Not registered.")
         }
 
         guard let dependency = dependency as? Dependency else {
-            preconditionFailure("Grove: '\(key)' stored as '\(dependency.self)' (requested: '\(Dependency.self)').")
+            preconditionFailure("Grove: '\(String(describing: Dependency.self))' stored as '\(dependency.self)' (requested: '\(Dependency.self)').")
         }
 
         return dependency
+    }
+
+    /// Returns the scope for a dependency
+    /// - Returns: The scope
+    ///
+    public func scope<Dependency>(for type: Dependency.Type) -> Scope {
+        dependencyItemsMapLock.lock()
+        let scope = dependencyItemsMap[key(for: type)]
+        dependencyItemsMapLock.unlock()
+
+        switch scope {
+        case .initializer(_, let scope):
+            return scope
+        case .instance:
+            return .singleton
+        case .none:
+            preconditionFailure("Grove: '\(String(describing: Dependency.self))' Not registered.")
+        }
     }
 
     // MARK: Helpers
