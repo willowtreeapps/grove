@@ -17,7 +17,7 @@ Grove is available through the Swift Package Manager. To install it, simply add 
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/willowtreeapps/grove.git", from: "1.0.0")
+    .package(url: "https://github.com/willowtreeapps/grove.git", from: "1.0.1")
 ]
 ```
 
