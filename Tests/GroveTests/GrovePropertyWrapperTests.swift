@@ -50,3 +50,18 @@ final class GrovePropertyWrapperTests: XCTestCase {
         XCTAssertEqual(testClass2.value, 100)
     }
 }
+
+final class GrovePropertyWrapperAsClassTests: XCTestCase {
+    @Resolve(TestProtocol.self) var testClass
+
+    func testUpdatedRegistration() {
+        // Given
+        Grove.defaultContainer.register(as: TestProtocol.self, scope: .singleton, TestClass(value: 10))
+
+        // When
+        Grove.defaultContainer.register(as: TestProtocol.self, scope: .singleton, TestClass(value: 20))
+
+        // Then
+        XCTAssertEqual(testClass.value, 20)
+    }
+}

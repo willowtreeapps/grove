@@ -1,6 +1,6 @@
 # Grove
 Simple Swift Dependency Injection Container.
-Somewhat like grove is a group of trees, Grove's container represents a group of dependencies, and it provides you with tools to easily manage them.
+Somewhat like a grove is a group of trees, Grove's container represents a group of dependencies, and it provides you with tools to easily manage them.
 
 ## Description
 Grove is a super simple and lightweight Dependency Injection library available for Swift. It's designed to help you manage a group of dependencies in a container, and easily resolve them when needed, thus helping make your project more modular, testable, and maintainable.
@@ -21,8 +21,6 @@ dependencies: [
 ]
 ```
 
-(Note: Until it's public, use this repository address: `git@github.com:willowtreeapps/grove.git`, version "1.0.0-beta.3")
-
 ## Usage
 Grove simplifies dependency registration and resolving. Here's an example:
 
@@ -30,6 +28,9 @@ Grove simplifies dependency registration and resolving. Here's an example:
 
 ```swift
 let container = Grove.defaultContainer // You can use the default container or create your own
+
+// Register specifying a type to use for resolution
+container.register(as: NASARepositoryProtocol.self, NASARepository())
 
 // Register a reference type dependency as a singleton 
 container.register(JSONEncoder())
