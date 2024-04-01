@@ -21,19 +21,13 @@ import Foundation
 ///  ```
 ///
 @propertyWrapper
-public struct Resolve<Dependency> {
-    private var container: Grove
+public class Resolve<Dependency>: @unchecked Sendable {
+    private let container: Grove
+    private let transientInstanceLock = NSLock()
     private var transientInstance: Dependency?
 
     public init(_ type: Dependency.Type, container: Grove = .defaultContainer) {
         self.container = container
-
-        switch container.scope(for: type) {
-        case .singleton:
-            break
-        case .transient:
-            transientInstance = (container.resolve() as Dependency)
-        }
     }
 
     public var wrappedValue: Dependency {
@@ -41,8 +35,14 @@ public struct Resolve<Dependency> {
         case .singleton:
             return container.resolve()
         case .transient:
+            transientInstanceLock.lock()
+            defer {
+                transientInstanceLock.unlock()
+            }
             guard let transientInstance else {
-                preconditionFailure("Grove: Error resolving transient dependency: '\(String(describing: Dependency.self))'")
+                let transientInstance = (container.resolve() as Dependency)
+                self.transientInstance = transientInstance
+                return transientInstance
             }
             return transientInstance
         }
