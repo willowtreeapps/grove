@@ -17,7 +17,7 @@ Grove is available through the Swift Package Manager. To install it, simply add 
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/willowtreeapps/grove.git", from: "1.0.1")
+    .package(url: "https://github.com/willowtreeapps/grove.git", from: "1.1.0")
 ]
 ```
 
@@ -55,49 +55,41 @@ let jsonEncoder: JSONEncoder = container.resolve()
 @Resolve(DeploymentEnvironment.self) var deploymentEnvironment
 ```
 
-### Using a registrar
+### Using the included registrar
 
 This shows how you can set up a registrar class both for production and for unit tests and SwiftUI previews:
 
 ```swift
-final class DependenciesRegistrar {
-    static let container = Grove.defaultContainer
-     
-    static func register() {
-        container.register(as: JSONEncoder.self) {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            return encoder
-        }
+import Grove
 
-        container.register(as: JSONDecoder.self) {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            return decoder
-        }
+@main
+struct YourApp: App {
 
-        container.register(as: NASARepositoryProtocol.self, NASARepository())
-    }
-
-    static func registerMocks() {
-        container.register(as: JSONEncoder.self) {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            return encoder
-        }
-
-        container.register(as: JSONDecoder.self) {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            return decoder
-        }
-
-        container.register(as: NASARepositoryProtocol.self, MockNASARepository())
+    init() {
+        GroveRegistrar.register(
+            /// Registers dependencies that will be used normally by the app
+            baseDependencies: { container in
+                container.register(as: Environment.self, Environment.production)
+                container.register(as: NASARepositoryProtocol.self, NASARepository())
+            },
+            /// Registers overrides to be used by the app during development (RUNNING_IN_DEVELOPMENT_MODE environment variable)
+            developmentOverrides: { container in
+                container.register(as: Environment.self, Environment.local)
+                container.register(as: NASARepositoryProtocol.self, MockNASARepository())
+            },
+            /// Registers overrides to be used by the app during unit tests and swiftui previews 
+            unitTestOverrides: { container in
+                container.register(as: Environment.self, Environment.local)
+                container.register(as: NASARepositoryProtocol.self, MockNASARepository())
+            },
+            /// Registers dependencies to be used by the app during UI automation tests
+            uiAutomationOverrides: { container in
+                container.register(as: Environment.self, Environment.mockService)
+            }
+        )
     }
 }
 ```
-
-You can then call `DependenciesRegistrar.register()` from your App's `init()` or `AppDelegate`. For unit tests or SwiftUI previews, you can call `DependenciesRegistrar.registerMocks()`.
 
 ## Contributing
 Contributions are immensely appreciated. Feel free to submit pull requests or to create issues to discuss any potential bugs or improvements.
