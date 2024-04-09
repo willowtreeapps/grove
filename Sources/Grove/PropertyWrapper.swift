@@ -31,20 +31,26 @@ public class Resolve<Dependency>: @unchecked Sendable {
     }
 
     public var wrappedValue: Dependency {
-        switch container.scope(for: Dependency.self) {
-        case .singleton:
-            return container.resolve()
-        case .transient:
-            transientInstanceLock.lock()
-            defer {
-                transientInstanceLock.unlock()
-            }
-            guard let transientInstance else {
-                let transientInstance = (container.resolve() as Dependency)
-                self.transientInstance = transientInstance
+        get {
+            switch container.scope(for: Dependency.self) {
+            case .singleton:
+                return container.resolve()
+            case .transient:
+                transientInstanceLock.lock()
+                defer {
+                    transientInstanceLock.unlock()
+                }
+                guard let transientInstance else {
+                    let transientInstance = (container.resolve() as Dependency)
+                    self.transientInstance = transientInstance
+                    return transientInstance
+                }
                 return transientInstance
             }
-            return transientInstance
+        }
+
+        set {
+            /* No-Op */
         }
     }
 }

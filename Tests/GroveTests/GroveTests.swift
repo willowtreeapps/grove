@@ -1,7 +1,7 @@
 import XCTest
 @testable import Grove
 
-protocol TestProtocol {
+private protocol TestProtocol {
     var value: Int { get }
     func increment()
 }
