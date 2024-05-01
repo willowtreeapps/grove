@@ -113,6 +113,13 @@ public final class Grove: @unchecked Sendable {
         }
     }
 
+    /// Resets the container
+    public func reset() {
+        dependencyItemsMapLock.lock()
+        dependencyItemsMap.removeAll()
+        dependencyItemsMapLock.unlock()
+    }
+
     // MARK: Helpers
 
     private func key<Dependency>(for type: Dependency.Type) -> ObjectIdentifier {

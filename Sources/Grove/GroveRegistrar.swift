@@ -16,6 +16,7 @@ public struct GroveRegistrar {
         unitTestOverrides: ((Grove) -> Void)? = nil,
         uiAutomationOverrides: ((Grove) -> Void)? = nil
     ) {
+        container.reset()
         baseDependencies(container)
 
         switch RunState(developmentModeEnvironmentVariable: developmentModeEnvironmentVariable) {
